@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "NodeType" AS ENUM ('TRIGGER', 'BEHAVIOR');
+CREATE TYPE "NodeType" AS ENUM ('TRIGGER', 'ACTION', 'OUTCOME');
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -51,9 +51,11 @@ CREATE TABLE "VerificationToken" (
 CREATE TABLE "TriggerMap" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "goal" TEXT NOT NULL,
+    "goal" TEXT NOT NULL DEFAULT '',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "description" TEXT,
+    "title" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "TriggerMap_pkey" PRIMARY KEY ("id")
 );
@@ -64,7 +66,7 @@ CREATE TABLE "MapNode" (
     "triggerMapId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "type" "NodeType" NOT NULL,
-    "order" DOUBLE PRECISION NOT NULL,
+    "order" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

@@ -1,42 +1,87 @@
-// src/components/MapNodeItem.tsx
-import React from 'react';
-import { MapNode, NodeType } from '@prisma/client';
+// src/components/TriggerMapBuilder.tsx
+'use client';
 
-interface UIMapNode extends Omit<MapNode, 'id' | 'triggerMapId' | 'createdAt' | 'updatedAt'> {
-    tempId: string;
+import { useState } from 'react';
+import MapNodeItem from './MapNodeItem';
+import { NodeType } from '@prisma/client';
+
+interface MapNode {
+  id: string;
+  type: NodeType;
+  content: string;
+  position: { x: number; y: number };
 }
 
-
-interface MapNodeItemProps {
-  node: UIMapNode;
-  onAddNode: () => void; // Function to call when (+) is clicked
-  // Add other handlers like onEdit, onDelete later
+interface TriggerMapBuilderProps {
+  initialNodes?: MapNode[];
+  onNodesChange?: (nodes: MapNode[]) => void;
 }
 
-export default function MapNodeItem({ node, onAddNode }: MapNodeItemProps) {
-  const nodeBgColor = node.type === 'BEHAVIOR' ? 'bg-blue-100 border-blue-300' : 'bg-green-100 border-green-300';
-  const nodeTextColor = node.type === 'BEHAVIOR' ? 'text-blue-800' : 'text-green-800';
+export default function TriggerMapBuilder({ initialNodes = [], onNodesChange }: TriggerMapBuilderProps) {
+  const [nodes, setNodes] = useState<MapNode[]>(initialNodes);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  const addNode = (type: NodeType) => {
+    const newNode: MapNode = {
+      id: Math.random().toString(),
+      type,
+      content: '',
+      position: { x: 100, y: 100 },
+    };
+    const updatedNodes = [...nodes, newNode];
+    setNodes(updatedNodes);
+    onNodesChange?.(updatedNodes);
+  };
+
+  const updateNode = (id: string, updates: Partial<MapNode>) => {
+    const updatedNodes = nodes.map(node =>
+      node.id === id ? { ...node, ...updates } : node
+    );
+    setNodes(updatedNodes);
+    onNodesChange?.(updatedNodes);
+  };
+
+  const deleteNode = (id: string) => {
+    const updatedNodes = nodes.filter(node => node.id !== id);
+    setNodes(updatedNodes);
+    if (selectedNodeId === id) {
+      setSelectedNodeId(null);
+    }
+    onNodesChange?.(updatedNodes);
+  };
 
   return (
-    <div className="flex flex-col items-center w-full">
-      {/* '+' Button Above Node (for inserting before this node - handled by previous node's 'add below') */}
-      {/* We only need the '+' button below each node to insert *after* it */}
-
-      {/* The Node itself */}
-      <div className={`p-2 px-4 rounded border ${nodeBgColor} ${nodeTextColor} text-center my-1 w-full max-w-md shadow-sm`}>
-        {node.content}
-        <span className="text-xs ml-2 opacity-50">({node.type})</span>
-        {/* Add Edit/Delete buttons here later if needed */}
+    <div className="relative w-full h-full min-h-[500px] bg-gray-100 rounded-lg">
+      <div className="absolute top-4 left-4 space-x-2">
+        <button
+          onClick={() => addNode(NodeType.TRIGGER)}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Add Trigger
+        </button>
+        <button
+          onClick={() => addNode(NodeType.ACTION)}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Add Action
+        </button>
+        <button
+          onClick={() => addNode(NodeType.OUTCOME)}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Add Outcome
+        </button>
       </div>
-
-      {/* '+' Button Below Node */}
-      <button
-         onClick={onAddNode}
-         className="my-1 w-6 h-6 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 flex items-center justify-center text-lg font-bold"
-         title="Add step after this"
-       >
-         +
-       </button>
+      {nodes.map(node => (
+        <MapNodeItem
+          key={node.id}
+          node={node}
+          isSelected={selectedNodeId === node.id}
+          onSelect={() => setSelectedNodeId(node.id)}
+          onUpdate={(updates) => updateNode(node.id, updates)}
+          onDelete={() => deleteNode(node.id)}
+        />
+      ))}
     </div>
   );
 }

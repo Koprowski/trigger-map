@@ -1,13 +1,11 @@
 // src/components/AuthButton.tsx
 'use client';
 
-import { signIn, signOut, Session } from 'next-auth/react';
+import { signIn, signOut, useSession } from "next-auth/react";
 
-interface AuthButtonProps {
-  session: Session | null; // Accept session from server component
-}
+export default function AuthButton() {
+  const { data: session } = useSession();
 
-export default function AuthButton({ session }: AuthButtonProps) {
   if (session?.user) {
     return (
       <div className="flex items-center gap-2">
@@ -27,7 +25,7 @@ export default function AuthButton({ session }: AuthButtonProps) {
 
   return (
     <button
-      onClick={() => signIn()} // Defaults to showing all providers
+      onClick={() => signIn("google")}
       className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded"
     >
       Sign In
