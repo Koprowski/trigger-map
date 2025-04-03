@@ -31,14 +31,14 @@ export default async function MapPage({
     include: {
       nodes: true,
     },
-  }) as unknown as TriggerMapWithNodes;
+  });
 
   if (!map) {
     return notFound();
   }
 
   // Format nodes to match the expected interface
-  const formattedNodes = map.nodes
+  const formattedNodes: MapNodeData[] = map.nodes
     .sort((a, b) => (a.order || 0) - (b.order || 0))
     .map(node => ({
       id: node.id,
@@ -48,7 +48,7 @@ export default async function MapPage({
       createdAt: node.createdAt,
       updatedAt: node.updatedAt,
       triggerMapId: node.triggerMapId
-    })) as MapNodeData[];
+    }));
 
   return (
     <div className="min-h-screen bg-gray-50">

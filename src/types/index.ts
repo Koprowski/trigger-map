@@ -1,8 +1,6 @@
-export enum NodeType {
-  TRIGGER = 'TRIGGER',
-  ACTION = 'ACTION',
-  OUTCOME = 'OUTCOME'
-}
+import { $Enums } from '@prisma/client';
+
+export type NodeType = $Enums.NodeType;
 
 export interface MapNode {
   id: string;
@@ -28,5 +26,5 @@ export interface TriggerMapWithNodes {
   id: string;
   goal: string;
   createdAt: Date;
-  nodes: MapNode[];
+  nodes: MapNodeData[];
 } 
