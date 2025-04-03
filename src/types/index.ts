@@ -22,4 +22,11 @@ export interface MapNodeData {
   createdAt: Date;
   updatedAt: Date;
   triggerMapId: string;
+}
+
+export interface TriggerMapWithNodes {
+  id: string;
+  goal: string;
+  createdAt: Date;
+  nodes: MapNode[];
 } 
