@@ -2,17 +2,7 @@
 
 import { useState } from "react";
 import MapEditor from "./MapEditor";
-import { NodeType } from "@prisma/client";
-
-interface MapNodeData {
-  id: string;
-  content: string;
-  type: NodeType;
-  position: number;
-  createdAt: Date;
-  updatedAt: Date;
-  triggerMapId: string;
-}
+import { NodeType, MapNodeData } from "@/types";
 
 interface MapEditorWrapperProps {
   goal: string;

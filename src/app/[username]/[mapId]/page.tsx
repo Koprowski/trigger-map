@@ -1,21 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { NodeType } from "@prisma/client";
 import MapEditorWrapper from "@/components/MapEditorWrapper";
-
-interface MapNode {
-  id: string;
-  content: string;
-  type: NodeType;
-  order: number;
-}
-
-interface TriggerMapWithNodes {
-  id: string;
-  goal: string;
-  createdAt: Date;
-  nodes: MapNode[];
-}
+import { NodeType, MapNode, TriggerMapWithNodes } from "@/types";
 
 export default async function MapPage({
   params,
@@ -58,7 +44,10 @@ export default async function MapPage({
       id: node.id,
       content: node.content,
       type: node.type,
-      order: node.order || 0,
+      position: node.order || 0,
+      createdAt: node.createdAt,
+      updatedAt: node.updatedAt,
+      triggerMapId: node.triggerMapId
     }));
 
   return (

@@ -1,9 +1,9 @@
 // src/app/api/trigger-map/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../auth/[...nextauth]/auth';
 import { prisma } from '@/lib/prisma';
-import { MapNode, Prisma } from '@prisma/client';
+import { NodeType, MapNode } from '@/types';
 
 // GET User's Trigger Maps (simplified for one map for now)
 export async function GET(req: NextRequest) {
@@ -67,10 +67,6 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(newMap, { status: 201 });
     } catch (error) {
-         if (error instanceof Prisma.PrismaClientValidationError) {
-             console.error("Validation Error:", error);
-             return NextResponse.json({ error: 'Invalid data provided', details: error.message }, { status: 400 });
-         }
         console.error("Failed to create trigger map:", error);
         return NextResponse.json({ error: 'Failed to create map' }, { status: 500 });
     }
