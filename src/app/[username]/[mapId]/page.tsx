@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import MapEditorWrapper from "@/components/MapEditorWrapper";
-import { NodeType, MapNode, TriggerMapWithNodes, MapNodeData } from "@/types";
+import { NodeType, MapNodeData } from "@/types";
 
 export default async function MapPage({
   params,
@@ -28,9 +28,25 @@ export default async function MapPage({
       id: params.mapId,
       userId: user.id,
     },
-    include: {
-      nodes: true,
-    },
+    select: {
+      id: true,
+      goal: true,
+      createdAt: true,
+      nodes: {
+        select: {
+          id: true,
+          content: true,
+          type: true,
+          order: true,
+          createdAt: true,
+          updatedAt: true,
+          triggerMapId: true
+        },
+        orderBy: {
+          order: 'asc'
+        }
+      }
+    }
   });
 
   if (!map) {
@@ -38,17 +54,15 @@ export default async function MapPage({
   }
 
   // Format nodes to match the expected interface
-  const formattedNodes: MapNodeData[] = map.nodes
-    .sort((a, b) => (a.order || 0) - (b.order || 0))
-    .map(node => ({
-      id: node.id,
-      content: node.content,
-      type: node.type,
-      position: node.order || 0,
-      createdAt: node.createdAt,
-      updatedAt: node.updatedAt,
-      triggerMapId: node.triggerMapId
-    }));
+  const formattedNodes: MapNodeData[] = map.nodes.map(node => ({
+    id: node.id,
+    content: node.content,
+    type: node.type as NodeType,
+    position: node.order,
+    createdAt: node.createdAt,
+    updatedAt: node.updatedAt,
+    triggerMapId: node.triggerMapId
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
