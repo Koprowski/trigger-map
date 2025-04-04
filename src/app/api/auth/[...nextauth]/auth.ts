@@ -3,6 +3,8 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 
+const productionUrl = 'https://triggermap.up.railway.app';
+
 export const authOptions: NextAuthOptions = {
   // @ts-ignore - PrismaAdapter typing issue with NextAuth
   adapter: PrismaAdapter(prisma),
@@ -72,21 +74,28 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback:', { url, baseUrl });
       
-      // Always use NEXTAUTH_URL as the base URL in production
-      const productionUrl = process.env.NEXTAUTH_URL || baseUrl;
-      
-      // If it's a relative URL, prefix with the production URL
-      if (url.startsWith('/')) {
-        return `${productionUrl}${url}`;
+      // Force production URL when on Railway
+      if (process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_PUBLIC_DOMAIN) {
+        // If it's a relative URL, prefix with production URL
+        if (url.startsWith('/')) {
+          return `${productionUrl}${url}`;
+        }
+        // If it's already our production domain, allow it
+        if (url.startsWith(productionUrl)) {
+          return url;
+        }
+        // Default to production URL
+        return productionUrl;
       }
       
-      // If it's already our domain, allow it
-      if (url.startsWith(productionUrl)) {
+      // For local development
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      if (url.startsWith(baseUrl)) {
         return url;
       }
-      
-      // Default to the production URL
-      return productionUrl;
+      return baseUrl;
     },
     async session({ session, user }) {
       console.log('Session callback:', { session, user });
