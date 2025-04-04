@@ -72,6 +72,11 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback:', { url, baseUrl });
       
+      // Allow Railway URL
+      if (url.startsWith('https://triggermap.up.railway.app')) {
+        return url;
+      }
+      
       // If the url is relative, prefix it with the base URL
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`;
