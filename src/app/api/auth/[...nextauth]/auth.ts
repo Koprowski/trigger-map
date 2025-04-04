@@ -106,9 +106,5 @@ export const authOptions: NextAuthOptions = {
       console.log('Session event:', message);
     },
   },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error',
-  },
-  debug: process.env.NODE_ENV === 'development',
+  debug: true,
 }; 
