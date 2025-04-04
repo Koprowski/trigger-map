@@ -34,6 +34,18 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  debug: true,
+  logger: {
+    error(code, ...message) {
+      console.error('AUTH ERROR:', code, ...message);
+    },
+    warn(code, ...message) {
+      console.warn('AUTH WARN:', code, ...message);
+    },
+    debug(code, ...message) {
+      console.log('AUTH DEBUG:', code, ...message);
+    }
+  },
   callbacks: {
     async signIn({ user, account, profile }) {
       console.log('SignIn callback started:', {
@@ -168,5 +180,4 @@ export const authOptions: NextAuthOptions = {
       console.log('Session event:', message);
     }
   },
-  debug: true,
 }; 
