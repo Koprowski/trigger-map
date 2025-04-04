@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
 
         console.log('User lookup result:', {
           exists: !!existingUser,
-          hasAccounts: existingUser?.accounts.length > 0
+          hasAccounts: existingUser?.accounts?.length > 0
         });
 
         if (!existingUser) {
@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // If user exists but no account is linked
-        if (existingUser.accounts.length === 0) {
+        if (!existingUser.accounts || existingUser.accounts.length === 0) {
           // Create the account link
           const newAccount = await prisma.account.create({
             data: {
