@@ -2,7 +2,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
-import { PrismaClient } from "@prisma/client";
 
 interface UserWithAccounts {
   id: string;
@@ -119,7 +118,7 @@ export const authOptions: NextAuthOptions = {
     },
     async redirect({ url, baseUrl }) {
       // Clean up URLs by removing any trailing semicolons or slashes
-      const cleanUrl = (url: string) => url.replace(/[;/]+$/, '');
+      const cleanUrl = (url: string) => url.replace(/[;/]+$/, '').replace(/;/g, '');
       
       const cleanedUrl = cleanUrl(url);
       const cleanedBaseUrl = cleanUrl(baseUrl);
