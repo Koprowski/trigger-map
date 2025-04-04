@@ -118,43 +118,50 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
+      // Clean up URLs by removing any trailing semicolons or slashes
+      const cleanUrl = (url: string) => url.replace(/[;/]+$/, '');
+      
+      const cleanedUrl = cleanUrl(url);
+      const cleanedBaseUrl = cleanUrl(baseUrl);
+      const nextAuthUrl = process.env.NEXTAUTH_URL ? cleanUrl(process.env.NEXTAUTH_URL) : cleanedBaseUrl;
+
       console.log('Redirect callback:', { 
-        url, 
-        baseUrl,
-        NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+        url: cleanedUrl, 
+        baseUrl: cleanedBaseUrl,
+        NEXTAUTH_URL: nextAuthUrl,
         currentUrl: typeof window !== 'undefined' ? window.location.href : 'Not available'
       });
       
       // Force production URL when on Railway
       if (process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_PUBLIC_DOMAIN) {
-        const prodUrl = process.env.NEXTAUTH_URL || baseUrl;
-        console.log('Production redirect:', { prodUrl, url });
+        const prodUrl = nextAuthUrl;
+        console.log('Production redirect:', { prodUrl, url: cleanedUrl });
         
         // If it's a relative URL, prefix with production URL
-        if (url.startsWith('/')) {
-          const finalUrl = `${prodUrl}${url}`;
+        if (cleanedUrl.startsWith('/')) {
+          const finalUrl = `${prodUrl}${cleanedUrl}`;
           console.log('Redirecting to:', finalUrl);
           return finalUrl;
         }
         // If it's already our production domain, allow it
-        if (url.startsWith(prodUrl)) {
-          console.log('Allowing production URL:', url);
-          return url;
+        if (cleanedUrl.startsWith(prodUrl)) {
+          console.log('Allowing production URL:', cleanedUrl);
+          return cleanedUrl;
         }
         // Default to production URL
         console.log('Defaulting to production URL:', prodUrl);
         return prodUrl;
       }
       
-      console.log('Development redirect:', { url, baseUrl });
+      console.log('Development redirect:', { url: cleanedUrl, baseUrl: cleanedBaseUrl });
       // For local development
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
+      if (cleanedUrl.startsWith('/')) {
+        return `${cleanedBaseUrl}${cleanedUrl}`;
       }
-      if (url.startsWith(baseUrl)) {
-        return url;
+      if (cleanedUrl.startsWith(cleanedBaseUrl)) {
+        return cleanedUrl;
       }
-      return baseUrl;
+      return cleanedBaseUrl;
     },
     async session({ session, user }) {
       console.log('Session callback:', { 
