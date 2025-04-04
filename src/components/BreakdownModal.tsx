@@ -26,7 +26,7 @@ export default function BreakdownModal({ initialStep, onClose, onSave }: Breakdo
                  <p className="text-sm text-gray-600 mb-2">Your step: "{initialStep}" seems like it might take more than 2 minutes.</p>
                  <p className="text-sm text-gray-600 mb-4">Try making it more specific or breaking it into a smaller first action. Think: What is the *very first physical action* you would take?</p>
                  <label htmlFor="breakdownStep" className="block text-sm font-medium text-gray-700">
-                    Revised Step (should take < 2 minutes):
+                    Revised Step (should take &lt; 2 minutes):
                  </label>
                  <textarea
                     id="breakdownStep"

@@ -73,7 +73,7 @@ export default async function MapPage({
     id: node.id,
     content: node.content,
     type: node.type as NodeType,
-    position: node.order,
+    position: Number(node.order || 0),
     createdAt: node.createdAt,
     updatedAt: node.updatedAt,
     triggerMapId: node.triggerMapId
