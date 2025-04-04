@@ -3,20 +3,35 @@ import { notFound } from "next/navigation";
 import MapEditorWrapper from "@/components/MapEditorWrapper";
 import { NodeType, MapNodeData } from "@/types";
 
+interface UserWithName {
+  id: string;
+  name: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 export default async function MapPage({
   params,
 }: {
   params: { username: string; mapId: string };
 }) {
-  // Find the user by their normalized username
-  const user = await prisma.user.findFirst({
+  // For SQLite, we need to use a different approach for case-insensitive searches
+  // Convert the username for searching to lowercase
+  const searchUsername = params.username.replace(/-/g, ' ').toLowerCase();
+  
+  // Find all users and filter manually for case-insensitive matching
+  const users = await prisma.user.findMany({
     where: {
       name: {
-        contains: params.username.replace(/-/g, ' '),
-        mode: 'insensitive',
+        not: null, // Only consider users with names
       },
     },
   });
+  
+  // Find the user with a case-insensitive match
+  const user = users.find((u: UserWithName) => 
+    u.name?.toLowerCase().includes(searchUsername)
+  );
 
   if (!user) {
     return notFound();
@@ -54,7 +69,7 @@ export default async function MapPage({
   }
 
   // Format nodes to match the expected interface
-  const formattedNodes: MapNodeData[] = map.nodes.map(node => ({
+  const formattedNodes: MapNodeData[] = map.nodes.map((node: any) => ({
     id: node.id,
     content: node.content,
     type: node.type as NodeType,
