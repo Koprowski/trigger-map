@@ -2,6 +2,21 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+
+interface UserWithAccounts {
+  id: string;
+  email: string | null;
+  name: string | null;
+  image: string | null;
+  accounts: Array<{
+    id: string;
+    userId: string;
+    type: string;
+    provider: string;
+    providerAccountId: string;
+  }>;
+}
 
 // Debug environment variables
 console.log('NextAuth Environment:', {
@@ -42,11 +57,11 @@ export const authOptions: NextAuthOptions = {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
           include: { accounts: true }
-        });
+        }) as UserWithAccounts | null;
 
         console.log('User lookup result:', {
           exists: !!existingUser,
-          hasAccounts: existingUser?.accounts?.length > 0
+          hasAccounts: existingUser?.accounts?.length ?? 0
         });
 
         if (!existingUser) {
