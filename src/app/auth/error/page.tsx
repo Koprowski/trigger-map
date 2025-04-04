@@ -2,53 +2,33 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
 
-function AuthErrorContent() {
+export default function ErrorPage() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
-  const errorMessages: { [key: string]: string } = {
-    OAuthAccountNotLinked: 'To confirm your identity, sign in with the same account you used originally.',
-    default: 'An error occurred during authentication.',
+  const errors: { [key: string]: string } = {
+    Configuration: "There is a problem with the server configuration.",
+    AccessDenied: "You do not have permission to sign in.",
+    Verification: "The verification link was invalid or has expired.",
+    OAuthAccountNotLinked: "To confirm your identity, sign in with the same account you used originally.",
+    default: "An error occurred during authentication.",
   };
 
-  const message = error ? errorMessages[error] || errorMessages.default : errorMessages.default;
+  const errorMessage = error ? errors[error] || errors.default : errors.default;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Authentication Error
-          </h2>
-          <p className="mt-2 text-center text-sm text-red-600">
-            {message}
-          </p>
-        </div>
-        <div className="mt-8 space-y-6">
-          <Link
-            href="/auth/signin"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Try Again
-          </Link>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+      <div className="text-center space-y-6">
+        <h1 className="text-4xl font-bold text-red-600">Authentication Error</h1>
+        <p className="text-xl">{errorMessage}</p>
+        <Link
+          href="/auth/signin"
+          className="inline-block px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+        >
+          Try Again
+        </Link>
       </div>
     </div>
-  );
-}
-
-export default function AuthError() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">Loading...</h2>
-        </div>
-      </div>
-    }>
-      <AuthErrorContent />
-    </Suspense>
   );
 } 

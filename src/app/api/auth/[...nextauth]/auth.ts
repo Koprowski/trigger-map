@@ -25,7 +25,6 @@ console.log('NextAuth Environment:', {
 });
 
 export const authOptions: NextAuthOptions = {
-  // @ts-ignore - PrismaAdapter typing issue with NextAuth
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -34,16 +33,9 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   debug: true,
-  logger: {
-    error(code, ...message) {
-      console.error('AUTH ERROR:', code, ...message);
-    },
-    warn(code, ...message) {
-      console.warn('AUTH WARN:', code, ...message);
-    },
-    debug(code, ...message) {
-      console.log('AUTH DEBUG:', code, ...message);
-    }
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
   },
   callbacks: {
     async signIn({ user, account, profile }) {
@@ -58,58 +50,18 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      if (!account) {
-        console.log('No account provided');
-        return false;
-      }
-
       try {
         // Check if user exists
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
-          include: { accounts: true }
-        }) as UserWithAccounts | null;
+        });
 
         console.log('User lookup result:', {
           exists: !!existingUser,
-          hasAccounts: existingUser?.accounts?.length ?? 0
+          id: existingUser?.id
         });
 
-        if (!existingUser) {
-          // Create new user if they don't exist
-          const newUser = await prisma.user.create({
-            data: {
-              email: user.email,
-              name: user.name,
-              image: user.image,
-            },
-          });
-          console.log('Created new user:', { id: newUser.id });
-          return true;
-        }
-
-        // If user exists but no account is linked
-        if (!existingUser.accounts || existingUser.accounts.length === 0) {
-          // Create the account link
-          const newAccount = await prisma.account.create({
-            data: {
-              userId: existingUser.id,
-              type: account.type,
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-              access_token: account.access_token || '',
-              expires_at: account.expires_at || null,
-              token_type: account.token_type || null,
-              scope: account.scope || null,
-              id_token: account.id_token || null,
-            },
-          });
-          console.log('Linked new account:', { 
-            userId: existingUser.id, 
-            provider: newAccount.provider 
-          });
-        }
-
+        // Allow the sign in - the adapter will handle account linking
         return true;
       } catch (error) {
         console.error('Error in signIn callback:', error);
@@ -117,7 +69,6 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      // Clean up URLs by removing any trailing semicolons or slashes
       const cleanUrl = (url: string) => url.replace(/[;/]+$/, '').replace(/;/g, '');
       
       const cleanedUrl = cleanUrl(url);
@@ -131,36 +82,8 @@ export const authOptions: NextAuthOptions = {
         currentUrl: typeof window !== 'undefined' ? window.location.href : 'Not available'
       });
       
-      // Force production URL when on Railway
-      if (process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_PUBLIC_DOMAIN) {
-        const prodUrl = nextAuthUrl;
-        console.log('Production redirect:', { prodUrl, url: cleanedUrl });
-        
-        // If it's a relative URL, prefix with production URL
-        if (cleanedUrl.startsWith('/')) {
-          const finalUrl = `${prodUrl}${cleanedUrl}`;
-          console.log('Redirecting to:', finalUrl);
-          return finalUrl;
-        }
-        // If it's already our production domain, allow it
-        if (cleanedUrl.startsWith(prodUrl)) {
-          console.log('Allowing production URL:', cleanedUrl);
-          return cleanedUrl;
-        }
-        // Default to production URL
-        console.log('Defaulting to production URL:', prodUrl);
-        return prodUrl;
-      }
-      
-      console.log('Development redirect:', { url: cleanedUrl, baseUrl: cleanedBaseUrl });
-      // For local development
-      if (cleanedUrl.startsWith('/')) {
-        return `${cleanedBaseUrl}${cleanedUrl}`;
-      }
-      if (cleanedUrl.startsWith(cleanedBaseUrl)) {
-        return cleanedUrl;
-      }
-      return cleanedBaseUrl;
+      // Always redirect to the home page after sign in
+      return nextAuthUrl;
     },
     async session({ session, user }) {
       console.log('Session callback:', { 
@@ -184,6 +107,12 @@ export const authOptions: NextAuthOptions = {
     },
     async session(message) {
       console.log('Session event:', message);
+    },
+    async createUser(message) {
+      console.log('CreateUser event:', message);
+    },
+    async linkAccount(message) {
+      console.log('LinkAccount event:', message);
     }
   },
 }; 

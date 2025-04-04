@@ -1,8 +1,9 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { signIn, getProviders } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import SignInComponent from "./SignInComponent";
 
 function SignInContent() {
   const searchParams = useSearchParams();
@@ -42,16 +43,15 @@ function SignInContent() {
   );
 }
 
-export default function SignIn() {
+export default async function SignIn() {
+  const providers = await getProviders();
+
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">Loading...</h2>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+      <div className="flex flex-col items-center space-y-8">
+        <h1 className="text-4xl font-bold">Sign In</h1>
+        <SignInComponent providers={providers} />
       </div>
-    }>
-      <SignInContent />
-    </Suspense>
+    </div>
   );
 } 
