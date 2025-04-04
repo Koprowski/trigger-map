@@ -72,23 +72,21 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback:', { url, baseUrl });
       
-      // Allow Railway URL
-      if (url.startsWith('https://triggermap.up.railway.app')) {
-        return url;
-      }
+      // Always use NEXTAUTH_URL as the base URL in production
+      const productionUrl = process.env.NEXTAUTH_URL || baseUrl;
       
-      // If the url is relative, prefix it with the base URL
+      // If it's a relative URL, prefix with the production URL
       if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
+        return `${productionUrl}${url}`;
       }
       
-      // If the url is from our domain, allow it
-      if (url.startsWith(baseUrl)) {
+      // If it's already our domain, allow it
+      if (url.startsWith(productionUrl)) {
         return url;
       }
       
-      // Default to the base URL
-      return baseUrl;
+      // Default to the production URL
+      return productionUrl;
     },
     async session({ session, user }) {
       console.log('Session callback:', { session, user });
