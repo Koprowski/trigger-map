@@ -2,6 +2,10 @@
 
 A web application for creating and managing behavior trigger maps. This tool helps users break down behaviors and habits into actionable steps, identifying specific triggers and actions for behavior change.
 
+## Deployment Status
+
+✅ Latest build working as of April 4, 2025.
+
 ## Features
 
 - Create detailed trigger maps for behavior change
