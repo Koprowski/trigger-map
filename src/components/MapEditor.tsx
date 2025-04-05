@@ -3,7 +3,9 @@
 import { useState, useCallback } from 'react';
 import { Switch } from '@headlessui/react';
 import { PencilIcon, LockClosedIcon, LockOpenIcon, LinkIcon, PlusCircleIcon } from '@heroicons/react/24/solid';
-import { NodeType } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+
+type NodeType = 'TRIGGER' | 'ACTION' | 'OUTCOME';
 
 interface MapNodeData {
   id: string;
@@ -147,22 +149,26 @@ export default function MapEditor({
 
         <div className="space-y-4">
           {!isLocked && sortedNodes.length === 0 && (
-            <button
-              onClick={() => handleAddNode(0)}
-              className="w-full flex justify-center py-2 text-blue-500 hover:text-blue-600"
-            >
-              <PlusCircleIcon className="h-6 w-6" />
-            </button>
+            <div className="h-8 flex items-center justify-center">
+              <button
+                onClick={() => handleAddNode(0)}
+                className="text-blue-500 hover:text-blue-600"
+              >
+                <PlusCircleIcon className="h-6 w-6" />
+              </button>
+            </div>
           )}
           {sortedNodes.map((node, index) => (
             <div key={node.id} className="relative">
               {!isLocked && index === 0 && (
-                <button
-                  onClick={() => handleAddNode(0)}
-                  className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-blue-500 hover:text-blue-600"
-                >
-                  <PlusCircleIcon className="h-6 w-6" />
-                </button>
+                <div className="h-8 flex items-center justify-center">
+                  <button
+                    onClick={() => handleAddNode(0)}
+                    className="text-blue-500 hover:text-blue-600"
+                  >
+                    <PlusCircleIcon className="h-6 w-6" />
+                  </button>
+                </div>
               )}
               {editingNodeId === node.id ? (
                 <input
@@ -181,26 +187,18 @@ export default function MapEditor({
                   {node.content}
                 </div>
               )}
-              {!isLocked && index < sortedNodes.length - 1 && (
-                <div className="flex items-center justify-center mb-4">
+              {!isLocked && (
+                <div className="h-8 flex items-center justify-center">
                   <button
                     onClick={() => handleAddNode(index + 1)}
-                    className="w-6 h-6 rounded-full bg-blue-500 text-white hover:bg-blue-600 flex items-center justify-center z-10"
+                    className="text-blue-500 hover:text-blue-600"
                   >
-                    +
+                    <PlusCircleIcon className="h-6 w-6" />
                   </button>
                 </div>
               )}
             </div>
           ))}
-          {!isLocked && sortedNodes.length > 0 && (
-            <button
-              onClick={() => handleAddNode(sortedNodes.length)}
-              className="w-full flex justify-center mt-2 text-blue-500 hover:text-blue-600"
-            >
-              <PlusCircleIcon className="h-6 w-6" />
-            </button>
-          )}
         </div>
 
         <div className="mt-8 text-sm text-gray-500 text-center">
