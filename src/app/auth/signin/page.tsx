@@ -47,11 +47,21 @@ export default async function SignIn() {
   const providers = await getProviders();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      <div className="flex flex-col items-center space-y-8">
-        <h1 className="text-4xl font-bold">Sign In</h1>
-        <SignInComponent providers={providers} />
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen flex-col items-center justify-center py-2">
+          <div className="text-center space-y-6">
+            <h1 className="text-4xl font-bold">Loading...</h1>
+          </div>
+        </div>
+      }
+    >
+      <div className="flex min-h-screen flex-col items-center justify-center py-2">
+        <div className="flex flex-col items-center space-y-8">
+          <h1 className="text-4xl font-bold">Sign In</h1>
+          <SignInComponent providers={providers} />
+        </div>
       </div>
-    </div>
+    </Suspense>
   );
 } 
